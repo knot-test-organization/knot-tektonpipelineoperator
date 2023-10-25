@@ -1,0 +1,205 @@
+---
+# tasks file for TektonPipeline
+- name: Generate random file name
+  set_fact:
+    file_name: "{{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
+
+- name: template vs
+  template:
+    src: virtualservice.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-vs.yaml"
+  ignore_errors: true
+
+- name: apply vs 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-vs.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template rb
+  template:
+    src: rolebinding.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-rb.yaml"
+  ignore_errors: true
+  
+- name: apply rb 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-rb.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template crb
+  template:
+    src: clusterrolebinding.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-crb.yaml"
+  ignore_errors: true
+
+- name: apply crb 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-crb.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template sa
+  template:
+    src: serviceaccount.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-sa.yaml"
+  ignore_errors: true
+
+- name: apply sa 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-sa.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template tt-prom
+  template:
+    src: triggertemplate-promotion.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tt-prom.yaml"
+  ignore_errors: true
+
+- name: apply tt-prom 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tt-prom.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template tt
+  template:
+    src: triggertemplate.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tt.yaml"
+  ignore_errors: true
+
+- name: apply tt 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tt.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template tt gitflow develop
+  template:
+    src: gitflow-templates/triggertemplate-develop.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tt.yaml"
+  ignore_errors: true
+
+- name: apply tt gitflow develop
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tt.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template tt gitflow release
+  template:
+    src: gitflow-templates/triggertemplate-release.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tt.yaml"
+  ignore_errors: true
+
+- name: apply tt gitflow release
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tt.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template tt gitflow hotfix
+  template:
+    src: gitflow-templates/triggertemplate-hotfix.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tt.yaml"
+  ignore_errors: true
+
+- name: apply tt gitflow hotfix
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tt.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template tt gitflow master
+  template:
+    src: gitflow-templates/triggertemplate-master.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tt.yaml"
+  ignore_errors: true
+
+- name: apply tt gitflow master
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tt.yaml -n tekton-pipelines"
+  ignore_errors: true
+  
+- name: template tb-prom
+  template:
+    src: tb-promotion.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tb-prom.yaml"
+  ignore_errors: true
+
+- name: apply tb-prom 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tb-prom.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template tb
+  template:
+    src: triggerbinding.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tb.yaml"
+  ignore_errors: true
+
+- name: apply tb 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tb.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template el
+  template:
+    src: eventlistener.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-el.yaml"
+  ignore_errors: true
+
+- name: apply el 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-el.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: template tr
+  template:
+    src: webhook-run.yml.j2
+    dest: "{{ role_path }}/{{ file_name }}-tr.yaml"
+  ignore_errors: true
+
+- name: apply tr 
+  shell: "kubectl apply -f {{ role_path }}/{{ file_name }}-tr.yaml -n tekton-pipelines"
+  ignore_errors: true
+
+- name: delete file vs
+  file:
+    path: "{{ role_path }}/{{ file_name }}-vs.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: delete file tr
+  file:
+    path: "{{ role_path }}/{{ file_name }}-tr.yaml"
+    state: absent
+  ignore_errors: true
+    
+- name: delete file rb
+  file:
+    path: "{{ role_path }}/{{ file_name }}-rb.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: delete file crb
+  file:
+    path: "{{ role_path }}/{{ file_name }}-crb.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: delete file sa
+  file:
+    path: "{{ role_path }}/{{ file_name }}-sa.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: delete file tt
+  file:
+    path: "{{ role_path }}/{{ file_name }}-tt.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: delete file tt-prom
+  file:
+    path: "{{ role_path }}/{{ file_name }}-tt-prom.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: delete file el
+  file:
+    path: "{{ role_path }}/{{ file_name }}-el.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: delete file tb
+  file:
+    path: "{{ role_path }}/{{ file_name }}-tb.yaml"
+    state: absent
+  ignore_errors: true
+
+- name: delete file tb-prom
+  file:
+    path: "{{ role_path }}/{{ file_name }}-tb-prom.yaml"
+    state: absent
+  ignore_errors: true

@@ -1,0 +1,62 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: "{{ application_name }}-promotion"
+  namespace: tekton-pipelines
+  labels:
+    app: "{{ application_name }}"
+spec:
+  params:
+    - name: productOrganization
+      description: Name of the product organization
+    - name: productArea
+      description: Name of the product Area
+    - name: productID
+      description: ID of the product 
+    - name: sourceImage
+      description: The source image to pull from the Container Registry
+    - name: targetImage
+      description: The target image to be pushed back to the Container Registry
+    - name: registry
+      description: The Container Registry hostname
+    - name: tag
+      description: The image new tag 
+    - name: imageSHA
+      description:  the gitbub image SHA
+    - name: namespace
+      description:  the namespace to create the resources
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        namespace: "$(tt.params.namespace)"
+        generateName: build-with-promotion-
+        labels:
+          app: "{{ application_name }}"
+      spec:
+        serviceAccountName: "{{ application_name }}"
+        podTemplate:
+          securityContext:
+            fsGroup: 65532
+        pipelineRef:
+          name: build-with-promotion
+        workspaces:
+        - name: dockerconfig
+          secret:
+            secretName: "{{ application_name }}"
+            items:
+            - key: .dockerconfigjson
+              path: config.json 
+        params:
+        - name: sourceImage
+          value: "{{ application_name }}.azurecr.io/{{ application_name }}:$(tt.params.imageSHA)"
+        - name: targetImage
+          value: "{{ application_name }}.azurecr.io/{{ application_name }}:$(tt.params.tag)"
+        - name: registry
+          value: "{{ application_name }}.azurecr.io"
+        - name: productOrganization
+          value: "{{ organization_product }}" 
+        - name: productArea
+          value: "{{ area_product }}" 
+        - name: productID
+          value: "{{ id_product }}"   

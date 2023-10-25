@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: "{{ application_name }}"
+  namespace: tekton-pipelines
+spec:
+  gateways:
+  - gitops/knot-gateway
+  hosts:
+  - knot.westeurope.cloudapp.azure.com
+  http:
+  - name: "event-listener"
+    match:
+    - uri:
+        prefix: "/event-listener/{{ application_name }}/"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: "el-{{ application_name }}"
+        port:
+          number: 8080

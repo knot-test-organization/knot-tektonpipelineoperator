@@ -1,0 +1,123 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: "{{ application_name }}-gitflow-hotfix" 
+  namespace: tekton-pipelines
+  labels:
+    app: "{{ application_name }}"
+spec:
+  params:
+    - name: productOrganization
+      description: Name of the product organization
+      default: ""  
+    - name: productArea
+      description: Name of the product Area
+      default: ""  
+    - name: productID
+      description: ID of the product 
+      default: ""
+    - name: gitrevision
+      description: The git revision
+      default: 0.0.0
+    - name: gitrepositoryurl
+      description: The git repository url
+    - name: namespace
+      description: The namespace to create the resources
+    - name: repoName
+      description: name of the repository
+    - name: repo-url
+      description: The git repository url
+      default: master
+    - name: sonarqube-scan 
+      description: Triggers or not the sonarqube scan
+    - name: SONAR_HOST_URL
+      description: URL of the sonarqube server
+    - name: SONAR_PROJECT_KEY
+      description: name of the sonarqube project for the scan
+    - name: SOURCE_TO_SCAN
+      description: locantion of the repository files in the shared workspace
+    - name: SONAR_ORGANIZATION
+      description: default
+    - name: IMAGE
+      description: repository to push the image
+    - name: project-type
+      description: technology of the project
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        namespace: $(tt.params.namespace)
+        generateName: "{{ pipeline_template }}-gitflow-hotfix-"
+        labels:
+          app: "{{ application_name }}"
+        annotations:
+          dapr.io/enabled: "true"
+          dapr.io/app-id: "{{ application_name }}"
+          dapr.io/enable-api-logging: "true"
+          dapr.io/log-level: "debug"
+      spec:
+        serviceAccountName: "{{ application_name }}"
+        podTemplate:
+          securityContext:
+            fsGroup: 65532
+        pipelineRef:
+          name: "{{ pipeline_template }}-gitflow-hotfix"
+        workspaces:
+        - name: pipeline-data-pvc
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+        - name: git-basic-auth-secret
+          secret:
+            secretName: git-basic-auth-secret
+        - name: sonar-token-auth-secret
+          secret:
+            secretName: sonar-token-auth-secret
+        - name: sonar-settings
+          configMap:
+            name: sonar-settings              
+        - name: my-secret-para-docker
+          secret:
+            secretName: {{ application_name }}
+            items:
+            - key: .dockerconfigjson
+              path: config.json
+        - name: maven-settings
+          emptyDir: {}           
+        params:
+        - name: productOrganization
+          value: "{{ organization_product }}" 
+        - name: productArea
+          value: "{{ area_product }}" 
+        - name: productID
+          value: "{{ id_product }}"     
+        - name: repo-url
+          value: $(tt.params.gitrepositoryurl)
+        - name: repoName
+          value: $(tt.params.repoName)
+        - name: gitrevision
+          value: $(tt.params.gitrevision)
+        - name: sonarqube-scan  
+          value: "{{ sonarqube_scan }}"
+        - name: SONAR_HOST_URL
+          value: "http://knot-sonar.westeurope.cloudapp.azure.com:9000"
+        - name: SONAR_PROJECT_KEY
+          value: {{ application_name }}
+        - name: SOURCE_TO_SCAN
+          value: /workspace/source/
+        - name: SONAR_ORGANIZATION
+          value: default
+        - name: IMAGE
+          value: "{{ application_name }}.azurecr.io/{{ application_name }}"
+        - name: project-type
+          value: {{ project_type }}
+        - name: function-name
+          value: "$(tt.params.repoName)-dev-app"
+        - name: pipeline-run-name
+          value: $(context.pipelineRun.name)
+        - name: pipeline-name
+          value: "{{ pipeline_template }}-gitflow-hotfix"

@@ -1,0 +1,92 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: "{{ application_name }}-gitflow-master"  
+  namespace: tekton-pipelines
+  labels:
+    app: "{{ application_name }}-gitflow-master"  
+spec:
+  params:
+    - name: productOrganization
+      description: Name of the product organization
+      default: ""  
+    - name: productArea
+      description: Name of the product Area
+      default: ""  
+    - name: productID
+      description: ID of the product 
+      default: ""
+    - name: repoName
+      description: name of the repository
+    - name: IMAGE
+      description: repository to push the image
+    - name: tag
+      description: The image new tag    
+    - name: namespace
+      description: The namespace to create the resources  
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        namespace: $(tt.params.namespace)
+        generateName: "{{ pipeline_template }}-gitflow-master-"
+        labels:
+          app: "{{ application_name }}"
+        annotations:
+          dapr.io/enabled: "true"
+          dapr.io/app-id: "{{ application_name }}"
+          dapr.io/enable-api-logging: "true"
+          dapr.io/log-level: "debug"
+      spec:
+        serviceAccountName: "{{ application_name }}"
+        podTemplate:
+          securityContext:
+            fsGroup: 65532
+        pipelineRef:
+          name: "{{ pipeline_template }}-gitflow-master"
+        workspaces:
+        - name: pipeline-data-pvc
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+              - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+        - name: git-basic-auth-secret
+          secret:
+            secretName: git-basic-auth-secret
+        - name: sonar-token-auth-secret
+          secret:
+            secretName: sonar-token-auth-secret
+        - name: sonar-settings
+          configMap:
+            name: sonar-settings              
+        - name: my-secret-para-docker
+          secret:
+            secretName: {{ application_name }}
+            items:
+            - key: .dockerconfigjson
+              path: config.json
+        - name: maven-settings
+          emptyDir: {}           
+        params:
+        - name: productOrganization
+          value: "{{ organization_product }}" 
+        - name: productArea
+          value: "{{ area_product }}" 
+        - name: productID
+          value: "{{ id_product }}"     
+        - name: repoName
+          value: $(tt.params.repoName)
+        - name: IMAGE
+          value: "{{ application_name }}.azurecr.io/{{ application_name }}"
+        - name: tag
+          value: $(tt.params.tag)
+        - name: function-name
+          value: "$(tt.params.repoName)-dev-app"
+        - name: pipeline-run-name
+          value: $(context.pipelineRun.name)
+        - name: pipeline-name
+          value: "{{ pipeline_template }}-gitflow-master"
+

@@ -1,0 +1,13 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name:  "{{ application_name }}-promotion"
+  namespace: tekton-pipelines
+spec:
+  params:
+    - name: namespace
+      value: tekton-pipelines
+    - name: tag
+      value: $(body.ref)
+    - name: imageSHA
+      value: $(body.head_commit.id)  

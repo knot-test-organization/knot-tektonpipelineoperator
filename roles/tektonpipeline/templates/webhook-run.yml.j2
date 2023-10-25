@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: "{{ application_name }}"
+  namespace: tekton-pipelines
+spec:
+  taskRef:
+    name: create-webhook
+  params:
+  - name: GitHubOrg
+    value: "NTTData-HybridCloud"
+  - name: GitHubUser
+    value: "pmolinam@everis.com"
+  - name: GitHubRepo
+    value: "{{ application_name }}"
+  - name: GitHubSecretName
+    value: webhook-secret
+  - name: GitHubAccessTokenKey
+    value: token
+  - name: GitHubSecretStringKey
+    value: secret
+  - name: ExternalDomain
+    value: "knot.westeurope.cloudapp.azure.com/event-listener/{{ application_name }}/"
+#   If you are using github enterprise, provide a value for GitHubDomain
+#  - name: GitHubDomain
+#    value: git.corp.com
+  timeout: 1000s
+  serviceAccountName: tekton-triggers-createwebhook

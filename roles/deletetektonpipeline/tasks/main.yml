@@ -1,0 +1,51 @@
+- name: remove vs
+  shell: "kubectl delete virtualservice {{ application_name }} -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove sa
+  shell: "kubectl delete serviceaccount {{ application_name }} -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove rb
+  shell: "kubectl delete rolebinding {{ application_name }} -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove crb
+  shell: "kubectl delete clusterrolebinding {{ application_name }} -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove tr
+  shell: "kubectl delete taskrun {{ application_name }} -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove tt
+  shell: "kubectl delete triggertemplate {{ application_name }} -n tekton-pipelines"
+  ignore_errors: true
+  
+- name: remove tt-prom
+  shell: "kubectl delete triggertemplate {{ application_name }}-promotion -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove tt-release
+  shell: "kubectl delete triggertemplate {{ application_name }}-gitflow-release  -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove tt-hotfix
+  shell: "kubectl delete triggertemplate {{ application_name }}-gitflow-hotfix  -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove tt-master
+  shell: "kubectl delete triggertemplate {{ application_name }}-gitflow-master  -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove tb
+  shell: "kubectl delete triggerbinding {{ application_name }} -n tekton-pipelines"
+  ignore_errors: true
+  
+- name: remove tb-prom
+  shell: "kubectl delete triggerbinding {{ application_name }}-promotion -n tekton-pipelines"
+  ignore_errors: true
+
+- name: remove el
+  shell: "kubectl delete eventlistener {{ application_name }} -n tekton-pipelines"
+  ignore_errors: true

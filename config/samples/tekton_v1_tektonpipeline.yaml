@@ -1,0 +1,12 @@
+apiVersion: tekton.nttdata.com/v1
+kind: TektonPipeline
+metadata:
+  labels:
+    app.kubernetes.io/name: tektonpipeline
+    app.kubernetes.io/instance: tektonpipeline-sample
+    app.kubernetes.io/part-of: tektonpipeline
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: tektonpipeline
+  name: tektonpipeline-sample
+spec:
+  # TODO(user): Add fields here

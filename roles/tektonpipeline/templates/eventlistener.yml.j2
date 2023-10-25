@@ -1,0 +1,59 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: "{{ application_name }}"
+  namespace: tekton-pipelines
+spec:
+  serviceAccountName: "{{ application_name }}"
+  triggers:
+    - name: gitflow-develop-trigger
+      interceptors:
+        - cel:
+            filter: >-
+              body.ref == 'refs/heads/develop' || body.hook_id > 0               
+      bindings:
+        - ref: "{{ application_name }}"
+      template:
+        ref: "{{ application_name }}-gitflow-develop"
+    - name:  gitflow-release-trigger
+      interceptors:
+        - cel:
+            filter: >-
+              body.ref.contains('tag') && 
+              (body.ref.contains('-RC') || body.ref.contains('-rc')) &&
+              (body.base_ref == 'refs/heads/develop' || body.base_ref == 'refs/heads/release')               
+      bindings:
+        - ref: "{{ application_name }}"
+      template:
+        ref: "{{ application_name }}-gitflow-release"
+    - name:  gitflow-hotfix-trigger
+      interceptors:
+        - cel:
+            filter: >-
+               body.ref == 'refs/heads/hotfix'              
+      bindings:
+        - ref: "{{ application_name }}"
+      template:
+        ref: "{{ application_name }}-gitflow-hotfix"
+    - name:  gitflow-master-trigger
+      interceptors:
+        - cel:
+            filter: >-
+               body.ref.contains('tag') &&
+               (!body.ref.contains('-RC') && !body.ref.contains('-rc')) &&
+               (body.base_ref == 'refs/heads/release' || body.base_ref == 'refs/heads/master')            
+      bindings:
+        - ref: "{{ application_name }}"
+      template:
+        ref: "{{ application_name }}-gitflow-master"                 
+    - name: promotion-trigger 
+      interceptors:
+        - cel:
+            filter: >-
+              body.ref.contains('tag') 
+               (!body.ref.contains('-RC') && !body.ref.contains('-rc')) 
+      bindings:
+        - ref: "{{ application_name }}-promotion"
+      template:
+        ref: "{{ application_name }}-promotion"    
+

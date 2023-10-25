@@ -1,0 +1,10 @@
+---
+# Use the 'create api' subcommand to add watches to this file.
+- version: v1
+  group: tekton.nttdata.com
+  kind: TektonPipeline
+  playbook: playbooks/tektonpipeline-create.yml
+  finalizer:
+    name: tekton.nttdata.com
+    playbook: playbooks/tektonpipeline-delete.yml
+#+kubebuilder:scaffold:watch
